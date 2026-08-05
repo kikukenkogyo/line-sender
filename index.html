@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>LINE送信管理</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+    background: #0a0a0a;
+    color: #e0e0e0;
+    min-height: 100vh;
+    padding-bottom: 80px;
+  }
+
+  /* ヘッダー */
+  .header {
+    background: linear-gradient(135deg, #06c755 0%, #04a847 100%);
+    padding: 20px 16px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 20px rgba(6, 199, 85, 0.3);
+  }
+  .header h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .header .subtitle {
+    font-size: 12px;
+    color: rgba(255,255,255,0.8);
+    margin-top: 4px;
+  }
+  .badge {
+    background: rgba(255,255,255,0.25);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 2px 10px;
+    border-radius: 20px;
+    margin-left: auto;
+  }
+
+  /* メッセージカード */
+  .card-list {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .card {
+    background: #1a1a1a;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid #2a2a2a;
+    transition: all 0.3s ease;
+  }
+  .card.sent {
+    opacity: 0.4;
+    transform: scale(0.97);
+  }
+  .card-header {
+    padding: 14px 16px 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid #2a2a2a;
+  }
+  .card-header .dest {
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+  }
+  .card-header .tone-badge {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-weight: 500;
+    margin-left: auto;
+  }
+  .tone-group { background: #7c3aed22; color: #a78bfa; border: 1px solid #7c3aed44; }
+  .tone-friend { background: #f9731622; color: #fb923c; border: 1px solid #f9731644; }
+  .tone-work { background: #06c75522; color: #4ade80; border: 1px solid #06c75544; }
+  .tone-normal { background: #6b728022; color: #9ca3af; border: 1px solid #6b728044; }
+  .tone-polite { background: #3b82f622; color: #60a5fa; border: 1px solid #3b82f644; }
+
+  .priority-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .priority-high { background: #ef4444; box-shadow: 0 0 8px #ef444488; }
+  .priority-mid { background: #eab308; box-shadow: 0 0 8px #eab30888; }
+  .priority-low { background: #22c55e; box-shadow: 0 0 8px #22c55e88; }
+
+  /* メッセージ本文 */
+  .card-body {
+    padding: 14px 16px;
+  }
+  .message-text {
+    font-size: 15px;
+    line-height: 1.7;
+    color: #d4d4d4;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  /* 時間表示 */
+  .card-meta {
+    padding: 0 16px 6px;
+    font-size: 11px;
+    color: #666;
+  }
+
+  /* ボタンエリア */
+  .card-actions {
+    padding: 10px 16px 14px;
+    display: flex;
+    gap: 10px;
+  }
+  .btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn:active {
+    transform: scale(0.96);
+  }
+  .btn-copy {
+    background: #06c755;
+    color: #fff;
+  }
+  .btn-copy:hover { background: #05b34c; }
+  .btn-copy.copied {
+    background: #1d4ed8;
+  }
+  .btn-done {
+    background: #2a2a2a;
+    color: #999;
+    flex: 0.6;
+  }
+  .btn-done:hover { background: #333; color: #ccc; }
+  .btn-done.checked {
+    background: #1a1a2e;
+    color: #818cf8;
+  }
+
+  /* 空状態 */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #666;
+  }
+  .empty-state .icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+  }
+  .empty-state h2 {
+    font-size: 18px;
+    color: #888;
+    margin-bottom: 8px;
+  }
+
+  /* トースト通知 */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: #06c755;
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 8px 30px rgba(6,199,85,0.4);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 200;
+    white-space: nowrap;
+  }
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* 更新日時 */
+  .update-info {
+    text-align: center;
+    padding: 16px;
+    font-size: 11px;
+    color: #444;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>
+    <span>LINE送信管理</span>
+    <span class="badge" id="count">0件</span>
+  </h1>
+  <div class="subtitle">コピーしてLINEに貼り付け</div>
+</div>
+
+<div class="card-list" id="cardList"></div>
+<div class="update-info" id="updateInfo"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== メッセージデータ =====
+// Claude Codeが更新するエリア
+const messages = [
+  {
+    id: "3b33c51f6fc6810685afe4f8727fa037",
+    dest: "社内グループLINE",
+    tone: "⑤グループLINE",
+    toneClass: "tone-group",
+    type: "グループ",
+    message: "お疲れ様です！\n一つご報告です。\n\n8月3日付で坂本さんが退職となります。\n長い間ありがとうございました！\n新しいステージでも頑張ってほしいですね。\n\nこれからも皆さんよろしくお願いします！",
+    priority: "high",
+    priorityLabel: "🔴急ぎ",
+    created: "2026-08-05 12:12"
+  }
+];
+// ===== データここまで =====
+
+const lastUpdated = "2026-08-05 12:20";
+
+function init() {
+  const list = document.getElementById('cardList');
+  const countEl = document.getElementById('count');
+  const updateEl = document.getElementById('updateInfo');
+
+  if (messages.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">✅</div>
+        <h2>未送信メッセージなし</h2>
+        <p>すべて送信済みです！</p>
+      </div>`;
+    countEl.textContent = '0件';
+  } else {
+    countEl.textContent = messages.length + '件';
+    list.innerHTML = messages.map(m => createCard(m)).join('');
+  }
+  updateEl.textContent = '最終更新: ' + lastUpdated;
+}
+
+function createCard(m) {
+  const priorityClass = m.priority === 'high' ? 'priority-high' :
+                         m.priority === 'mid' ? 'priority-mid' : 'priority-low';
+  return `
+    <div class="card" id="card-${m.id}">
+      <div class="card-header">
+        <div class="priority-dot ${priorityClass}"></div>
+        <span class="dest">${escHtml(m.dest)}</span>
+        <span class="tone-badge ${m.toneClass}">${escHtml(m.tone)}</span>
+      </div>
+      <div class="card-body">
+        <div class="message-text">${escHtml(m.message)}</div>
+      </div>
+      <div class="card-meta">${m.priorityLabel} ・ ${m.type} ・ ${m.created}</div>
+      <div class="card-actions">
+        <button class="btn btn-copy" id="copy-${m.id}" onclick="copyMsg('${m.id}')">
+          📋 コピー
+        </button>
+        <button class="btn btn-done" id="done-${m.id}" onclick="markDone('${m.id}')">
+          ✅ 送信済み
+        </button>
+      </div>
+    </div>`;
+}
+
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+async function copyMsg(id) {
+  const m = messages.find(x => x.id === id);
+  if (!m) return;
+
+  try {
+    await navigator.clipboard.writeText(m.message);
+  } catch {
+    // フォールバック
+    const ta = document.createElement('textarea');
+    ta.value = m.message;
+    ta.style.cssText = 'position:fixed;left:-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  }
+
+  const btn = document.getElementById('copy-' + id);
+  btn.classList.add('copied');
+  btn.innerHTML = '✅ コピー済み';
+
+  showToast('クリップボードにコピーしました！');
+
+  setTimeout(() => {
+    btn.classList.remove('copied');
+    btn.innerHTML = '📋 コピー';
+  }, 3000);
+}
+
+function markDone(id) {
+  const card = document.getElementById('card-' + id);
+  const btn = document.getElementById('done-' + id);
+
+  card.classList.add('sent');
+  btn.classList.add('checked');
+  btn.innerHTML = '✔ 送信済み';
+  btn.onclick = null;
+
+  showToast('送信済みにしました');
+
+  // カウント更新
+  const remaining = document.querySelectorAll('.card:not(.sent)').length;
+  document.getElementById('count').textContent = remaining + '件';
+}
+
+function showToast(text) {
+  const t = document.getElementById('toast');
+  t.textContent = text;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+init();
+</script>
+</body>
+</html>
