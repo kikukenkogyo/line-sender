@@ -307,34 +307,10 @@
 
 <script>
 // ===== メッセージデータ =====
-// Claude Codeが更新するエリア
-const messages = [
-  {
-    id: "be0b3b080c218899a39124b6f18db850",
-    dest: "社内グループLINE",
-    tone: "⑤グループLINE",
-    toneClass: "tone-group",
-    type: "グループ",
-    message: "テスト、テスト文章。",
-    priority: "mid",
-    priorityLabel: "🟡ふつう",
-    created: "2026-08-05 15:19"
-  },
-  {
-    id: "3b33c51f6fc6810685afe4f8727fa037",
-    dest: "社内グループLINE",
-    tone: "⑤グループLINE",
-    toneClass: "tone-group",
-    type: "グループ",
-    message: "お疲れ様です！\n一つご報告です。\n\n8月3日付で坂本さんが退職となります。\n長い間ありがとうございました！\n新しいステージでも頑張ってほしいですね。\n\nこれからも皆さんよろしくお願いします！",
-    priority: "high",
-    priorityLabel: "🔴急ぎ",
-    created: "2026-08-05 12:12"
-  }
-];
-// ===== データここまで =====
-
-const lastUpdated = "2026-08-05 15:19";
+// 中身は messages.json に入っている（add.mjs が更新する）
+// 開くたびに毎回サーバーから取り直すので、古い内容が残らない
+let messages = [];
+let lastUpdated = '';
 
 // ===== 送信済みの記録（スマホ内に保存） =====
 const STORE_KEY = 'lineSender.sent.v1';
@@ -367,9 +343,7 @@ function pruneSent(map) {
   return cleaned;
 }
 
-let sentMap = pruneSent(loadSent());
-saveSent(sentMap);
-
+let sentMap = loadSent();
 let currentFilter = 'todo';
 
 // ===== 表示 =====
@@ -577,7 +551,55 @@ document.getElementById('updateInfo').addEventListener('click', e => {
   showToast('記録を消しました');
 });
 
-render();
+// ===== データ読み込み =====
+function showLoading() {
+  document.getElementById('cardList').innerHTML = `
+    <div class="empty-state">
+      <div class="icon">⏳</div>
+      <h2>読み込み中…</h2>
+    </div>`;
+}
+
+function showLoadError(detail) {
+  document.getElementById('cardList').innerHTML = `
+    <div class="empty-state">
+      <div class="icon">⚠️</div>
+      <h2>読み込めませんでした</h2>
+      <p>電波を確認して、画面を下に引っぱって更新してください</p>
+    </div>`;
+  document.getElementById('updateInfo').textContent = 'エラー: ' + detail;
+}
+
+async function loadData(quiet) {
+  if (!quiet) showLoading();
+  try {
+    // ?t=... と no-store で、必ず最新を取りに行く（キャッシュ対策）
+    const res = await fetch('messages.json?t=' + Date.now(), { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+
+    const list = Array.isArray(data) ? data : (data && data.messages) || [];
+    const stamp = (data && data.updated) || '';
+    const changed = list.length !== messages.length;
+
+    messages = list;
+    lastUpdated = stamp;
+    sentMap = pruneSent(sentMap);
+    saveSent(sentMap);
+    render();
+
+    if (quiet && changed) showToast('新しいメッセージがあります');
+  } catch (e) {
+    if (!quiet) showLoadError(e.message);
+  }
+}
+
+// アプリに戻ってきたら、黙って最新を取り直す
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') loadData(true);
+});
+
+loadData(false);
 </script>
 </body>
 </html>

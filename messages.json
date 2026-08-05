@@ -1,0 +1,27 @@
+{
+  "updated": "2026-08-05 15:19",
+  "messages": [
+    {
+      "id": "be0b3b080c218899a39124b6f18db850",
+      "dest": "社内グループLINE",
+      "tone": "⑤グループLINE",
+      "toneClass": "tone-group",
+      "type": "グループ",
+      "message": "テスト、テスト文章。",
+      "priority": "mid",
+      "priorityLabel": "🟡ふつう",
+      "created": "2026-08-05 15:19"
+    },
+    {
+      "id": "3b33c51f6fc6810685afe4f8727fa037",
+      "dest": "社内グループLINE",
+      "tone": "⑤グループLINE",
+      "toneClass": "tone-group",
+      "type": "グループ",
+      "message": "お疲れ様です！\n一つご報告です。\n\n8月3日付で坂本さんが退職となります。\n長い間ありがとうございました！\n新しいステージでも頑張ってほしいですね。\n\nこれからも皆さんよろしくお願いします！",
+      "priority": "high",
+      "priorityLabel": "🔴急ぎ",
+      "created": "2026-08-05 12:12"
+    }
+  ]
+}

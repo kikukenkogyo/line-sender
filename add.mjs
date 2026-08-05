@@ -7,7 +7,7 @@
  *   node add.mjs message.json --no-push … GitHubに送らず、ファイルだけ更新
  *   node add.mjs message.json --no-git  … git操作を一切せず、ファイルだけ更新（動作確認用）
  *
- * JSONの形（1件でも、配列で複数件でもOK）:
+ * 渡すJSONの形（1件でも、配列で複数件でもOK）:
  *   {
  *     "dest":     "社内グループLINE",       // 必須：宛先
  *     "message":  "お疲れ様です！\n...",     // 必須：本文
@@ -15,6 +15,9 @@
  *     "priority": "high",                   // high / mid / low
  *     "type":     "グループ"                // 省略時は tone から自動
  *   }
+ *
+ * 追加先は messages.json（アプリが開くたびに読みに行くファイル）。
+ * index.html は触らない。
  */
 
 import { readFileSync, writeFileSync } from 'node:fs';
@@ -24,7 +27,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const REPO = dirname(fileURLToPath(import.meta.url));
-const HTML = join(REPO, 'index.html');
+const DATA = join(REPO, 'messages.json');
 
 // トーンの設定（表示名を変えたいときはここを直す）
 const TONES = {
@@ -40,9 +43,6 @@ const PRIORITIES = {
   mid:  '🟡ふつう',
   low:  '🟢あとで',
 };
-
-const START_MARK = 'const messages = [';
-const END_MARK = '// ===== データここまで =====';
 
 function fail(msg) {
   console.error('エラー: ' + msg);
@@ -92,49 +92,22 @@ function normalize(input, now) {
   };
 }
 
-function toLiteral(m) {
-  const q = v => JSON.stringify(v);
-  return [
-    '  {',
-    `    id: ${q(m.id)},`,
-    `    dest: ${q(m.dest)},`,
-    `    tone: ${q(m.tone)},`,
-    `    toneClass: ${q(m.toneClass)},`,
-    `    type: ${q(m.type)},`,
-    `    message: ${q(m.message)},`,
-    `    priority: ${q(m.priority)},`,
-    `    priorityLabel: ${q(m.priorityLabel)},`,
-    `    created: ${q(m.created)}`,
-    '  }',
-  ].join('\n');
-}
-
-function insert(html, entries, now) {
-  const startIdx = html.indexOf(START_MARK);
-  const endIdx = html.indexOf(END_MARK);
-  if (startIdx === -1 || endIdx === -1 || endIdx < startIdx) {
-    fail('index.html のデータ欄が見つかりません。ファイルが壊れていないか確認してください。');
+function loadData() {
+  let raw;
+  try {
+    raw = readFileSync(DATA, 'utf8');
+  } catch {
+    return { updated: '', messages: [] };   // まだ無ければ新規作成
   }
-
-  const closeIdx = html.lastIndexOf('];', endIdx);
-  if (closeIdx === -1 || closeIdx < startIdx) fail('index.html のデータ欄の閉じカッコが見つかりません。');
-
-  const insertAt = startIdx + START_MARK.length;
-  const existing = html.slice(insertAt, closeIdx).trim();
-  const block = entries.map(toLiteral).join(',\n');
-
-  let out = html.slice(0, insertAt)
-    + '\n' + block + (existing ? ',' : '')
-    + html.slice(insertAt);
-
-  const stampRe = /const lastUpdated = "[^"]*";/;
-  if (stampRe.test(out)) {
-    out = out.replace(stampRe, `const lastUpdated = ${JSON.stringify(now)};`);
-  } else {
-    console.warn('注意: lastUpdated を更新できませんでした（表示だけの問題です）');
+  let data;
+  try {
+    data = JSON.parse(raw);
+  } catch (e) {
+    fail('messages.json が壊れています: ' + e.message);
   }
-
-  return out;
+  const messages = Array.isArray(data) ? data : (data && data.messages) || [];
+  if (!Array.isArray(messages)) fail('messages.json の "messages" が配列ではありません。');
+  return { updated: (data && data.updated) || '', messages };
 }
 
 function git(args) {
@@ -154,8 +127,10 @@ if (list.length === 0) fail('追加するメッセージがありません。');
 
 const entries = list.map(x => normalize(x, now));
 
-const html = readFileSync(HTML, 'utf8');
-writeFileSync(HTML, insert(html, entries, now), 'utf8');
+const data = loadData();
+data.messages = [...entries, ...data.messages];
+data.updated = now;
+writeFileSync(DATA, JSON.stringify({ updated: data.updated, messages: data.messages }, null, 2) + '\n', 'utf8');
 
 console.log(`追加しました（${entries.length}件）:`);
 for (const e of entries) console.log(`  ・${e.dest} / ${e.tone} / ${e.priorityLabel}`);
@@ -166,7 +141,7 @@ if (noGit) {
 }
 
 try {
-  git(['add', 'index.html']);
+  git(['add', 'messages.json']);
   const subject = entries.length === 1
     ? `メッセージ追加: ${entries[0].dest}`
     : `メッセージ追加: ${entries.length}件`;

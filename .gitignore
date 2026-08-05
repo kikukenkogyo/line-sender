@@ -1,0 +1,2 @@
+# 一時的な入力ファイル（add.mjs に渡すJSON）
+tmp_*.json
