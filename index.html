@@ -297,6 +297,62 @@
     cursor: pointer;
     padding: 4px;
   }
+
+  /* 編集モード */
+  .edit-area {
+    width: 100%;
+    min-height: 120px;
+    background: #111;
+    color: #e0e0e0;
+    border: 1px solid #06c755;
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 15px;
+    line-height: 1.7;
+    font-family: inherit;
+    resize: vertical;
+    outline: none;
+  }
+  .edit-area:focus {
+    border-color: #4ade80;
+    box-shadow: 0 0 0 2px rgba(6,199,85,0.2);
+  }
+  .edit-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .btn-save {
+    background: #06c755;
+    color: #fff;
+  }
+  .btn-cancel {
+    background: #2a2a2a;
+    color: #999;
+  }
+  .btn-edit {
+    background: #2a2a2a;
+    color: #999;
+    flex: 0 0 52px;
+    font-size: 16px;
+  }
+  .edited-badge {
+    display: inline-block;
+    font-size: 10px;
+    color: #f59e0b;
+    margin-left: 6px;
+  }
+  .btn-revert {
+    background: none;
+    border: none;
+    color: #f59e0b;
+    font-size: 10px;
+    font-family: inherit;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 0 4px;
+    -webkit-tap-highlight-color: transparent;
+  }
 </style>
 </head>
 <body>
@@ -333,6 +389,7 @@ let lastUpdated = '';
 // hidden … 一覧から消したもの（元データは残るので元に戻せる）
 const SENT_KEY = 'lineSender.sent.v1';
 const HIDDEN_KEY = 'lineSender.hidden.v1';
+const EDIT_KEY = 'lineSender.edit.v1';
 
 function loadMap(key) {
   try {
@@ -364,7 +421,20 @@ function pruneMap(map) {
 
 let sentMap = loadMap(SENT_KEY);
 let hiddenMap = loadMap(HIDDEN_KEY);
+let editMap = loadMap(EDIT_KEY);
 let currentFilter = 'todo';
+let editingId = null; // 今編集中のメッセージID
+
+// 編集済みテキストがあればそれを、なければ元のテキストを返す
+function getMessageText(id) {
+  if (Object.prototype.hasOwnProperty.call(editMap, id)) return editMap[id];
+  const m = messages.find(x => x.id === id);
+  return m ? m.message : '';
+}
+
+function isEdited(id) {
+  return Object.prototype.hasOwnProperty.call(editMap, id);
+}
 
 // ===== 表示 =====
 const PRIORITY_ORDER = { high: 0, mid: 1, low: 2 };
@@ -457,18 +527,38 @@ function createCard(m) {
   const priorityClass = m.priority === 'high' ? 'priority-high' :
                         m.priority === 'mid' ? 'priority-mid' : 'priority-low';
   const done = isSent(m.id);
-  const long = (m.message.match(/\n/g) || []).length >= 6 || m.message.length > 220;
+  const text = getMessageText(m.id);
+  const edited = isEdited(m.id);
+  const editing = editingId === m.id;
+  const long = !editing && ((text.match(/\n/g) || []).length >= 6 || text.length > 220);
+
+  let bodyHtml;
+  if (editing) {
+    bodyHtml = `
+      <textarea class="edit-area" id="editArea-${m.id}">${escHtml(text)}</textarea>
+      <div class="edit-actions">
+        <button class="btn btn-save" data-action="editSave" data-id="${m.id}">💾 保存</button>
+        <button class="btn btn-cancel" data-action="editCancel" data-id="${m.id}">キャンセル</button>
+      </div>`;
+  } else {
+    bodyHtml = `
+      <div class="message-text ${long ? 'clamped' : ''}" id="text-${m.id}">${escHtml(text)}</div>
+      ${long ? `<button class="more-btn" data-action="more" data-id="${m.id}">▼ 全文を表示</button>` : ''}`;
+  }
+
+  const editedLabel = edited && !editing
+    ? `<span class="edited-badge">✏️ 編集済み <button class="btn-revert" data-action="revert" data-id="${m.id}">元に戻す</button></span>`
+    : '';
 
   return `
     <div class="card ${done ? 'sent' : ''}" id="card-${m.id}">
       <div class="card-header">
         <div class="priority-dot ${priorityClass}"></div>
-        <span class="dest">${escHtml(m.dest)}</span>
+        <span class="dest">${escHtml(m.dest)}${editedLabel}</span>
         <span class="tone-badge ${m.toneClass}">${escHtml(m.tone)}</span>
       </div>
       <div class="card-body">
-        <div class="message-text ${long ? 'clamped' : ''}" id="text-${m.id}">${escHtml(m.message)}</div>
-        ${long ? `<button class="more-btn" data-action="more" data-id="${m.id}">▼ 全文を表示</button>` : ''}
+        ${bodyHtml}
       </div>
       <div class="card-meta">
         ${escHtml(m.priorityLabel)} ・ ${escHtml(m.type)} ・ ${escHtml(m.created)}
@@ -476,6 +566,7 @@ function createCard(m) {
       </div>
       <div class="card-actions">
         <button class="btn btn-copy" id="copy-${m.id}" data-action="copy" data-id="${m.id}">📋 コピー</button>
+        <button class="btn btn-edit" data-action="edit" data-id="${m.id}" title="本文を編集">✏️</button>
         <button class="btn btn-line" data-action="line" title="LINEを開く">💬</button>
         <button class="btn btn-done ${done ? 'checked' : ''}" data-action="done" data-id="${m.id}">
           ${done ? '↩ 取り消し' : '✅ 送信済み'}
@@ -495,12 +586,13 @@ async function copyMsg(id) {
   const m = messages.find(x => x.id === id);
   if (!m) return;
 
+  const text = getMessageText(id);
   let ok = true;
   try {
-    await navigator.clipboard.writeText(m.message);
+    await navigator.clipboard.writeText(text);
   } catch {
     const ta = document.createElement('textarea');
-    ta.value = m.message;
+    ta.value = text;
     ta.style.cssText = 'position:fixed;left:-9999px';
     document.body.appendChild(ta);
     ta.select();
@@ -571,6 +663,55 @@ function nowLabel() {
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
 }
 
+// ===== 編集操作 =====
+function startEdit(id) {
+  editingId = id;
+  render();
+  // テキストエリアにフォーカスし、末尾にカーソルを置く
+  const area = document.getElementById('editArea-' + id);
+  if (area) {
+    area.focus();
+    area.selectionStart = area.selectionEnd = area.value.length;
+    // 高さを内容に合わせる
+    area.style.height = area.scrollHeight + 'px';
+    area.addEventListener('input', () => {
+      area.style.height = 'auto';
+      area.style.height = area.scrollHeight + 'px';
+    });
+  }
+}
+
+function saveEdit(id) {
+  const area = document.getElementById('editArea-' + id);
+  if (!area) return;
+  const newText = area.value;
+  const m = messages.find(x => x.id === id);
+  if (!m) return;
+
+  // 元のテキストと同じなら編集記録を消す
+  if (newText === m.message) {
+    delete editMap[id];
+  } else {
+    editMap[id] = newText;
+  }
+  saveMap(EDIT_KEY, editMap);
+  editingId = null;
+  render();
+  showToast('本文を保存しました');
+}
+
+function cancelEdit(id) {
+  editingId = null;
+  render();
+}
+
+function revertEdit(id) {
+  delete editMap[id];
+  saveMap(EDIT_KEY, editMap);
+  render();
+  showToast('元の文面に戻しました');
+}
+
 function expand(id) {
   const el = document.getElementById('text-' + id);
   if (!el) return;
@@ -597,6 +738,10 @@ document.getElementById('cardList').addEventListener('click', e => {
     case 'done': toggleDone(id); break;
     case 'more': expand(id); break;
     case 'line': location.href = 'https://line.me/R/nv/chat'; break;
+    case 'edit': startEdit(id); break;
+    case 'editSave': saveEdit(id); break;
+    case 'editCancel': cancelEdit(id); break;
+    case 'revert': revertEdit(id); break;
   }
 });
 
@@ -660,6 +805,8 @@ async function loadData(quiet) {
     saveMap(SENT_KEY, sentMap);
     hiddenMap = pruneMap(hiddenMap);
     saveMap(HIDDEN_KEY, hiddenMap);
+    editMap = pruneMap(editMap);
+    saveMap(EDIT_KEY, editMap);
     render();
 
     if (quiet && changed) showToast('新しいメッセージがあります');
