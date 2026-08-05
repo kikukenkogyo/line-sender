@@ -2,9 +2,10 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#06c755">
 <title>LINE送信管理</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -14,13 +15,13 @@
     background: #0a0a0a;
     color: #e0e0e0;
     min-height: 100vh;
-    padding-bottom: 80px;
+    padding-bottom: calc(80px + env(safe-area-inset-bottom));
   }
 
   /* ヘッダー */
   .header {
     background: linear-gradient(135deg, #06c755 0%, #04a847 100%);
-    padding: 20px 16px 16px;
+    padding: calc(20px + env(safe-area-inset-top)) 16px 16px;
     position: sticky;
     top: 0;
     z-index: 100;
@@ -49,6 +50,38 @@
     margin-left: auto;
   }
 
+  /* 絞り込みタブ */
+  .tabs {
+    display: flex;
+    gap: 6px;
+    padding: 12px 12px 0;
+  }
+  .tab {
+    flex: 1;
+    padding: 9px 4px;
+    background: #161616;
+    border: 1px solid #2a2a2a;
+    border-radius: 10px;
+    color: #888;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .tab:active { transform: scale(0.97); }
+  .tab.active {
+    background: #06c75522;
+    border-color: #06c75566;
+    color: #4ade80;
+  }
+  .tab .num {
+    font-size: 11px;
+    opacity: 0.7;
+    margin-left: 3px;
+  }
+
   /* メッセージカード */
   .card-list {
     padding: 12px;
@@ -61,12 +94,13 @@
     border-radius: 16px;
     overflow: hidden;
     border: 1px solid #2a2a2a;
-    transition: all 0.3s ease;
+    transition: opacity 0.25s ease, border-color 0.25s ease;
   }
   .card.sent {
-    opacity: 0.4;
-    transform: scale(0.97);
+    opacity: 0.5;
+    border-color: #232323;
   }
+  .card.sent .message-text { color: #8a8a8a; }
   .card-header {
     padding: 14px 16px 10px;
     display: flex;
@@ -85,6 +119,7 @@
     border-radius: 6px;
     font-weight: 500;
     margin-left: auto;
+    white-space: nowrap;
   }
   .tone-group { background: #7c3aed22; color: #a78bfa; border: 1px solid #7c3aed44; }
   .tone-friend { background: #f9731622; color: #fb923c; border: 1px solid #f9731644; }
@@ -113,6 +148,24 @@
     white-space: pre-wrap;
     word-break: break-word;
   }
+  .message-text.clamped {
+    display: -webkit-box;
+    -webkit-line-clamp: 6;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .more-btn {
+    margin-top: 8px;
+    background: none;
+    border: none;
+    color: #06c755;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    padding: 2px 0;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
 
   /* 時間表示 */
   .card-meta {
@@ -120,27 +173,32 @@
     font-size: 11px;
     color: #666;
   }
+  .card-meta .sent-at {
+    color: #818cf8;
+  }
 
   /* ボタンエリア */
   .card-actions {
     padding: 10px 16px 14px;
     display: flex;
-    gap: 10px;
+    gap: 8px;
   }
   .btn {
     flex: 1;
-    padding: 12px;
+    padding: 12px 8px;
     border: none;
     border-radius: 12px;
     font-size: 15px;
     font-weight: 600;
+    font-family: inherit;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
-    transition: all 0.2s ease;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
     -webkit-tap-highlight-color: transparent;
+    white-space: nowrap;
   }
   .btn:active {
     transform: scale(0.96);
@@ -149,19 +207,24 @@
     background: #06c755;
     color: #fff;
   }
-  .btn-copy:hover { background: #05b34c; }
   .btn-copy.copied {
     background: #1d4ed8;
+  }
+  .btn-line {
+    background: #223022;
+    color: #4ade80;
+    flex: 0 0 52px;
+    font-size: 18px;
   }
   .btn-done {
     background: #2a2a2a;
     color: #999;
-    flex: 0.6;
+    flex: 0.7;
   }
-  .btn-done:hover { background: #333; color: #ccc; }
   .btn-done.checked {
     background: #1a1a2e;
     color: #818cf8;
+    flex: 0.9;
   }
 
   /* 空状態 */
@@ -179,13 +242,14 @@
     color: #888;
     margin-bottom: 8px;
   }
+  .empty-state p { font-size: 13px; }
 
   /* トースト通知 */
   .toast {
     position: fixed;
-    bottom: 30px;
+    bottom: calc(30px + env(safe-area-inset-bottom));
     left: 50%;
-    transform: translateX(-50%) translateY(100px);
+    transform: translateX(-50%) translateY(140px);
     background: #06c755;
     color: #fff;
     padding: 12px 24px;
@@ -207,6 +271,17 @@
     padding: 16px;
     font-size: 11px;
     color: #444;
+    line-height: 1.8;
+  }
+  .reset-btn {
+    background: none;
+    border: none;
+    color: #555;
+    font-size: 11px;
+    font-family: inherit;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 4px;
   }
 </style>
 </head>
@@ -218,6 +293,12 @@
     <span class="badge" id="count">0件</span>
   </h1>
   <div class="subtitle">コピーしてLINEに貼り付け</div>
+</div>
+
+<div class="tabs" id="tabs">
+  <button class="tab active" data-filter="todo">未送信<span class="num" id="numTodo"></span></button>
+  <button class="tab" data-filter="sent">送信済み<span class="num" id="numSent"></span></button>
+  <button class="tab" data-filter="all">すべて<span class="num" id="numAll"></span></button>
 </div>
 
 <div class="card-list" id="cardList"></div>
@@ -244,46 +325,135 @@ const messages = [
 
 const lastUpdated = "2026-08-05 12:20";
 
-function init() {
-  const list = document.getElementById('cardList');
-  const countEl = document.getElementById('count');
-  const updateEl = document.getElementById('updateInfo');
+// ===== 送信済みの記録（スマホ内に保存） =====
+const STORE_KEY = 'lineSender.sent.v1';
 
-  if (messages.length === 0) {
-    list.innerHTML = `
-      <div class="empty-state">
-        <div class="icon">✅</div>
-        <h2>未送信メッセージなし</h2>
-        <p>すべて送信済みです！</p>
-      </div>`;
-    countEl.textContent = '0件';
-  } else {
-    countEl.textContent = messages.length + '件';
-    list.innerHTML = messages.map(m => createCard(m)).join('');
+function loadSent() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    const obj = raw ? JSON.parse(raw) : {};
+    return (obj && typeof obj === 'object') ? obj : {};
+  } catch {
+    return {};
   }
-  updateEl.textContent = '最終更新: ' + lastUpdated;
+}
+
+function saveSent(map) {
+  try {
+    localStorage.setItem(STORE_KEY, JSON.stringify(map));
+  } catch {
+    showToast('保存できませんでした（プライベートモード？）');
+  }
+}
+
+// 今あるメッセージのぶんだけ残す（古い記録の掃除）
+function pruneSent(map) {
+  const ids = new Set(messages.map(m => m.id));
+  const cleaned = {};
+  for (const id of Object.keys(map)) {
+    if (ids.has(id)) cleaned[id] = map[id];
+  }
+  return cleaned;
+}
+
+let sentMap = pruneSent(loadSent());
+saveSent(sentMap);
+
+let currentFilter = 'todo';
+
+// ===== 表示 =====
+const PRIORITY_ORDER = { high: 0, mid: 1, low: 2 };
+
+function sortedMessages() {
+  return messages.slice().sort((a, b) => {
+    const pa = PRIORITY_ORDER[a.priority] ?? 3;
+    const pb = PRIORITY_ORDER[b.priority] ?? 3;
+    if (pa !== pb) return pa - pb;
+    return String(b.created).localeCompare(String(a.created));
+  });
+}
+
+function isSent(id) {
+  return Object.prototype.hasOwnProperty.call(sentMap, id);
+}
+
+function render() {
+  const list = document.getElementById('cardList');
+  const all = sortedMessages();
+  const todo = all.filter(m => !isSent(m.id));
+  const sent = all.filter(m => isSent(m.id));
+
+  document.getElementById('count').textContent = todo.length + '件';
+  document.getElementById('numTodo').textContent = todo.length;
+  document.getElementById('numSent').textContent = sent.length;
+  document.getElementById('numAll').textContent = all.length;
+
+  const shown = currentFilter === 'todo' ? todo
+              : currentFilter === 'sent' ? sent
+              : all;
+
+  if (shown.length === 0) {
+    list.innerHTML = emptyState();
+  } else {
+    list.innerHTML = shown.map(createCard).join('');
+  }
+
+  document.getElementById('updateInfo').innerHTML =
+    '最終更新: ' + escHtml(lastUpdated) +
+    '<br><button class="reset-btn" id="resetBtn">送信済みの記録をすべて消す</button>';
+}
+
+function emptyState() {
+  if (currentFilter === 'sent') {
+    return `
+      <div class="empty-state">
+        <div class="icon">📭</div>
+        <h2>送信済みはまだありません</h2>
+        <p>送ったら「送信済み」を押してください</p>
+      </div>`;
+  }
+  if (currentFilter === 'all') {
+    return `
+      <div class="empty-state">
+        <div class="icon">📝</div>
+        <h2>メッセージがありません</h2>
+        <p>新しい依頼があると、ここに追加されます</p>
+      </div>`;
+  }
+  return `
+    <div class="empty-state">
+      <div class="icon">✅</div>
+      <h2>未送信メッセージなし</h2>
+      <p>すべて送信済みです！</p>
+    </div>`;
 }
 
 function createCard(m) {
   const priorityClass = m.priority === 'high' ? 'priority-high' :
-                         m.priority === 'mid' ? 'priority-mid' : 'priority-low';
+                        m.priority === 'mid' ? 'priority-mid' : 'priority-low';
+  const done = isSent(m.id);
+  const long = (m.message.match(/\n/g) || []).length >= 6 || m.message.length > 220;
+
   return `
-    <div class="card" id="card-${m.id}">
+    <div class="card ${done ? 'sent' : ''}" id="card-${m.id}">
       <div class="card-header">
         <div class="priority-dot ${priorityClass}"></div>
         <span class="dest">${escHtml(m.dest)}</span>
         <span class="tone-badge ${m.toneClass}">${escHtml(m.tone)}</span>
       </div>
       <div class="card-body">
-        <div class="message-text">${escHtml(m.message)}</div>
+        <div class="message-text ${long ? 'clamped' : ''}" id="text-${m.id}">${escHtml(m.message)}</div>
+        ${long ? `<button class="more-btn" data-action="more" data-id="${m.id}">▼ 全文を表示</button>` : ''}
       </div>
-      <div class="card-meta">${m.priorityLabel} ・ ${m.type} ・ ${m.created}</div>
+      <div class="card-meta">
+        ${escHtml(m.priorityLabel)} ・ ${escHtml(m.type)} ・ ${escHtml(m.created)}
+        ${done ? `<br><span class="sent-at">✔ 送信済み: ${escHtml(sentMap[m.id])}</span>` : ''}
+      </div>
       <div class="card-actions">
-        <button class="btn btn-copy" id="copy-${m.id}" onclick="copyMsg('${m.id}')">
-          📋 コピー
-        </button>
-        <button class="btn btn-done" id="done-${m.id}" onclick="markDone('${m.id}')">
-          ✅ 送信済み
+        <button class="btn btn-copy" id="copy-${m.id}" data-action="copy" data-id="${m.id}">📋 コピー</button>
+        <button class="btn btn-line" data-action="line" title="LINEを開く">💬</button>
+        <button class="btn btn-done ${done ? 'checked' : ''}" data-action="done" data-id="${m.id}">
+          ${done ? '↩ 取り消し' : '✅ 送信済み'}
         </button>
       </div>
     </div>`;
@@ -291,63 +461,112 @@ function createCard(m) {
 
 function escHtml(s) {
   const d = document.createElement('div');
-  d.textContent = s;
+  d.textContent = s == null ? '' : String(s);
   return d.innerHTML;
 }
 
+// ===== 操作 =====
 async function copyMsg(id) {
   const m = messages.find(x => x.id === id);
   if (!m) return;
 
+  let ok = true;
   try {
     await navigator.clipboard.writeText(m.message);
   } catch {
-    // フォールバック
     const ta = document.createElement('textarea');
     ta.value = m.message;
     ta.style.cssText = 'position:fixed;left:-9999px';
     document.body.appendChild(ta);
     ta.select();
-    document.execCommand('copy');
+    try { ok = document.execCommand('copy'); } catch { ok = false; }
     document.body.removeChild(ta);
   }
 
+  if (!ok) {
+    showToast('コピーできませんでした');
+    return;
+  }
+
   const btn = document.getElementById('copy-' + id);
-  btn.classList.add('copied');
-  btn.innerHTML = '✅ コピー済み';
-
-  showToast('クリップボードにコピーしました！');
-
-  setTimeout(() => {
-    btn.classList.remove('copied');
-    btn.innerHTML = '📋 コピー';
-  }, 3000);
+  if (btn) {
+    btn.classList.add('copied');
+    btn.innerHTML = '✅ コピー済み';
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.innerHTML = '📋 コピー';
+    }, 3000);
+  }
+  showToast('コピーしました！LINEに貼り付けてください');
 }
 
-function markDone(id) {
-  const card = document.getElementById('card-' + id);
-  const btn = document.getElementById('done-' + id);
+function toggleDone(id) {
+  if (isSent(id)) {
+    delete sentMap[id];
+    saveSent(sentMap);
+    render();
+    showToast('未送信に戻しました');
+  } else {
+    sentMap[id] = nowLabel();
+    saveSent(sentMap);
+    render();
+    showToast('送信済みにしました');
+  }
+}
 
-  card.classList.add('sent');
-  btn.classList.add('checked');
-  btn.innerHTML = '✔ 送信済み';
-  btn.onclick = null;
+function nowLabel() {
+  const d = new Date();
+  const p = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
 
-  showToast('送信済みにしました');
-
-  // カウント更新
-  const remaining = document.querySelectorAll('.card:not(.sent)').length;
-  document.getElementById('count').textContent = remaining + '件';
+function expand(id) {
+  const el = document.getElementById('text-' + id);
+  if (!el) return;
+  el.classList.remove('clamped');
+  const btn = document.querySelector(`[data-action="more"][data-id="${id}"]`);
+  if (btn) btn.remove();
 }
 
 function showToast(text) {
   const t = document.getElementById('toast');
   t.textContent = text;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2000);
+  clearTimeout(showToast._timer);
+  showToast._timer = setTimeout(() => t.classList.remove('show'), 2200);
 }
 
-init();
+// ===== イベント =====
+document.getElementById('cardList').addEventListener('click', e => {
+  const btn = e.target.closest('[data-action]');
+  if (!btn) return;
+  const id = btn.dataset.id;
+  switch (btn.dataset.action) {
+    case 'copy': copyMsg(id); break;
+    case 'done': toggleDone(id); break;
+    case 'more': expand(id); break;
+    case 'line': location.href = 'https://line.me/R/nv/chat'; break;
+  }
+});
+
+document.getElementById('tabs').addEventListener('click', e => {
+  const tab = e.target.closest('.tab');
+  if (!tab) return;
+  currentFilter = tab.dataset.filter;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === tab));
+  render();
+});
+
+document.getElementById('updateInfo').addEventListener('click', e => {
+  if (!e.target.closest('#resetBtn')) return;
+  if (!confirm('送信済みの記録をすべて消して、全部を未送信に戻します。よろしいですか？')) return;
+  sentMap = {};
+  saveSent(sentMap);
+  render();
+  showToast('記録を消しました');
+});
+
+render();
 </script>
 </body>
 </html>
