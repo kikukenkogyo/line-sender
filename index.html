@@ -49,6 +49,20 @@
     border-radius: 20px;
     margin-left: auto;
   }
+  .refresh-btn {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    border-radius: 50%;
+    width: 34px;
+    height: 34px;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.4s ease;
+  }
+  .refresh-btn:active { background: rgba(255,255,255,0.35); }
+  .refresh-btn.spin { transform: rotate(360deg); }
 
   /* 絞り込みタブ */
   .tabs {
@@ -291,8 +305,9 @@
   <h1>
     <span>LINE送信管理</span>
     <span class="badge" id="count">0件</span>
+    <button class="refresh-btn" id="refreshBtn" title="最新を読み込む">🔄</button>
   </h1>
-  <div class="subtitle">コピーしてLINEに貼り付け</div>
+  <div class="subtitle" id="subtitle">コピーしてLINEに貼り付け</div>
 </div>
 
 <div class="tabs" id="tabs">
@@ -382,6 +397,9 @@ function render() {
   } else {
     list.innerHTML = shown.map(createCard).join('');
   }
+
+  document.getElementById('subtitle').textContent =
+    lastUpdated ? '最終更新: ' + lastUpdated : 'コピーしてLINEに貼り付け';
 
   document.getElementById('updateInfo').innerHTML =
     '最終更新: ' + escHtml(lastUpdated) +
@@ -597,6 +615,16 @@ async function loadData(quiet) {
 // アプリに戻ってきたら、黙って最新を取り直す
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') loadData(true);
+});
+
+// 🔄ボタン：手動で最新を読み込む
+document.getElementById('refreshBtn').addEventListener('click', async e => {
+  const btn = e.currentTarget;
+  btn.classList.add('spin');
+  const before = messages.length;
+  await loadData(true);
+  setTimeout(() => btn.classList.remove('spin'), 400);
+  showToast(messages.length > before ? '新しいメッセージがあります' : '最新の状態です');
 });
 
 loadData(false);
