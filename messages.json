@@ -1,6 +1,17 @@
 {
-  "updated": "2026-08-05 15:19",
+  "updated": "2026-08-05 15:27",
   "messages": [
+    {
+      "id": "45c1f5ca95bea008f5fdf91a95fa3763",
+      "dest": "社内グループLINE",
+      "tone": "⑤グループLINE",
+      "toneClass": "tone-group",
+      "type": "グループ",
+      "message": "つないでみようか。もう一度テスト文をLINEに送って。じゃあ。",
+      "priority": "mid",
+      "priorityLabel": "🟡ふつう",
+      "created": "2026-08-05 15:27"
+    },
     {
       "id": "be0b3b080c218899a39124b6f18db850",
       "dest": "社内グループLINE",
