@@ -1,6 +1,17 @@
 {
-  "updated": "2026-08-05 15:31",
+  "updated": "2026-08-05 22:05",
   "messages": [
+    {
+      "id": "3dfe41405767c11ad80e5e636863a02d",
+      "dest": "社内グループLINE",
+      "tone": "⑤グループLINE",
+      "toneClass": "tone-group",
+      "type": "グループ",
+      "message": "お疲れ様です。\n\nお知らせです。\n菊建ページのURLを本日付で変更しました。\n\n新しいURLはこちらです👇\n◯◯◯\n\nお手数ですが、ブックマークされている方は登録の更新をお願いします🙇‍♂️",
+      "priority": "high",
+      "priorityLabel": "🔴急ぎ",
+      "created": "2026-08-05 22:05"
+    },
     {
       "id": "c295003f5a41cfb1531e00e8cd0fa89d",
       "dest": "社内グループLINE",
