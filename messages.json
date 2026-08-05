@@ -1,6 +1,17 @@
 {
-  "updated": "2026-08-05 15:27",
+  "updated": "2026-08-05 15:31",
   "messages": [
+    {
+      "id": "c295003f5a41cfb1531e00e8cd0fa89d",
+      "dest": "社内グループLINE",
+      "tone": "⑤グループLINE",
+      "toneClass": "tone-group",
+      "type": "グループ",
+      "message": "もう一回は長崎？そう。3、4、6、5、6、6。",
+      "priority": "mid",
+      "priorityLabel": "🟡ふつう",
+      "created": "2026-08-05 15:31"
+    },
     {
       "id": "45c1f5ca95bea008f5fdf91a95fa3763",
       "dest": "社内グループLINE",
