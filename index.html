@@ -306,6 +306,7 @@
     <span>LINE送信管理</span>
     <span class="badge" id="count">0件</span>
     <button class="refresh-btn" id="refreshBtn" title="最新を読み込む">🔄</button>
+    <button class="refresh-btn" id="clearBtn" style="display:none" title="送信済みを一覧から消す">🗑</button>
   </h1>
   <div class="subtitle" id="subtitle">コピーしてLINEに貼り付け</div>
 </div>
@@ -327,29 +328,32 @@
 let messages = [];
 let lastUpdated = '';
 
-// ===== 送信済みの記録（スマホ内に保存） =====
-const STORE_KEY = 'lineSender.sent.v1';
+// ===== 記録（スマホ内に保存） =====
+// sent  … 送信済みにしたもの
+// hidden … 一覧から消したもの（元データは残るので元に戻せる）
+const SENT_KEY = 'lineSender.sent.v1';
+const HIDDEN_KEY = 'lineSender.hidden.v1';
 
-function loadSent() {
+function loadMap(key) {
   try {
-    const raw = localStorage.getItem(STORE_KEY);
+    const raw = localStorage.getItem(key);
     const obj = raw ? JSON.parse(raw) : {};
-    return (obj && typeof obj === 'object') ? obj : {};
+    return (obj && typeof obj === 'object' && !Array.isArray(obj)) ? obj : {};
   } catch {
     return {};
   }
 }
 
-function saveSent(map) {
+function saveMap(key, map) {
   try {
-    localStorage.setItem(STORE_KEY, JSON.stringify(map));
+    localStorage.setItem(key, JSON.stringify(map));
   } catch {
     showToast('保存できませんでした（プライベートモード？）');
   }
 }
 
 // 今あるメッセージのぶんだけ残す（古い記録の掃除）
-function pruneSent(map) {
+function pruneMap(map) {
   const ids = new Set(messages.map(m => m.id));
   const cleaned = {};
   for (const id of Object.keys(map)) {
@@ -358,14 +362,15 @@ function pruneSent(map) {
   return cleaned;
 }
 
-let sentMap = loadSent();
+let sentMap = loadMap(SENT_KEY);
+let hiddenMap = loadMap(HIDDEN_KEY);
 let currentFilter = 'todo';
 
 // ===== 表示 =====
 const PRIORITY_ORDER = { high: 0, mid: 1, low: 2 };
 
 function sortedMessages() {
-  return messages.slice().sort((a, b) => {
+  return messages.filter(m => !isHidden(m.id)).sort((a, b) => {
     const pa = PRIORITY_ORDER[a.priority] ?? 3;
     const pb = PRIORITY_ORDER[b.priority] ?? 3;
     if (pa !== pb) return pa - pb;
@@ -375,6 +380,14 @@ function sortedMessages() {
 
 function isSent(id) {
   return Object.prototype.hasOwnProperty.call(sentMap, id);
+}
+
+function isHidden(id) {
+  return Object.prototype.hasOwnProperty.call(hiddenMap, id);
+}
+
+function hiddenCount() {
+  return messages.filter(m => isHidden(m.id)).length;
 }
 
 function render() {
@@ -401,9 +414,18 @@ function render() {
   document.getElementById('subtitle').textContent =
     lastUpdated ? '最終更新: ' + lastUpdated : 'コピーしてLINEに貼り付け';
 
-  document.getElementById('updateInfo').innerHTML =
-    '最終更新: ' + escHtml(lastUpdated) +
-    '<br><button class="reset-btn" id="resetBtn">送信済みの記録をすべて消す</button>';
+  // 🗑ボタンは、送信済みが1件以上あるときだけ出す
+  const clearBtn = document.getElementById('clearBtn');
+  clearBtn.style.display = sent.length > 0 ? '' : 'none';
+  clearBtn.title = `送信済み${sent.length}件を一覧から消す`;
+
+  const hid = hiddenCount();
+  let footer = '最終更新: ' + escHtml(lastUpdated)
+    + '<br><button class="reset-btn" id="resetBtn">送信済みマークをすべて解除する</button>';
+  if (hid > 0) {
+    footer += `<br><button class="reset-btn" id="restoreBtn">消した${hid}件を元に戻す</button>`;
+  }
+  document.getElementById('updateInfo').innerHTML = footer;
 }
 
 function emptyState() {
@@ -506,15 +528,41 @@ async function copyMsg(id) {
 function toggleDone(id) {
   if (isSent(id)) {
     delete sentMap[id];
-    saveSent(sentMap);
+    saveMap(SENT_KEY, sentMap);
     render();
     showToast('未送信に戻しました');
   } else {
     sentMap[id] = nowLabel();
-    saveSent(sentMap);
+    saveMap(SENT_KEY, sentMap);
     render();
     showToast('送信済みにしました');
   }
+}
+
+// 送信済みをまとめて一覧から消す（元データは残る）
+function clearSent() {
+  const targets = messages.filter(m => !isHidden(m.id) && isSent(m.id));
+  if (targets.length === 0) {
+    showToast('送信済みはありません');
+    return;
+  }
+  if (!confirm(`送信済みの${targets.length}件を一覧から消します。\n（元に戻すこともできます）`)) return;
+
+  const now = nowLabel();
+  for (const m of targets) hiddenMap[m.id] = now;
+  saveMap(HIDDEN_KEY, hiddenMap);
+  render();
+  showToast(`${targets.length}件を消しました`);
+}
+
+// 消したものを元に戻す
+function restoreHidden() {
+  const n = hiddenCount();
+  if (n === 0) return;
+  hiddenMap = {};
+  saveMap(HIDDEN_KEY, hiddenMap);
+  render();
+  showToast(`${n}件を元に戻しました`);
 }
 
 function nowLabel() {
@@ -561,13 +609,19 @@ document.getElementById('tabs').addEventListener('click', e => {
 });
 
 document.getElementById('updateInfo').addEventListener('click', e => {
+  if (e.target.closest('#restoreBtn')) {
+    restoreHidden();
+    return;
+  }
   if (!e.target.closest('#resetBtn')) return;
-  if (!confirm('送信済みの記録をすべて消して、全部を未送信に戻します。よろしいですか？')) return;
+  if (!confirm('送信済みマークをすべて解除して、全部を未送信に戻します。よろしいですか？')) return;
   sentMap = {};
-  saveSent(sentMap);
+  saveMap(SENT_KEY, sentMap);
   render();
-  showToast('記録を消しました');
+  showToast('送信済みマークを解除しました');
 });
+
+document.getElementById('clearBtn').addEventListener('click', clearSent);
 
 // ===== データ読み込み =====
 function showLoading() {
@@ -602,8 +656,10 @@ async function loadData(quiet) {
 
     messages = list;
     lastUpdated = stamp;
-    sentMap = pruneSent(sentMap);
-    saveSent(sentMap);
+    sentMap = pruneMap(sentMap);
+    saveMap(SENT_KEY, sentMap);
+    hiddenMap = pruneMap(hiddenMap);
+    saveMap(HIDDEN_KEY, hiddenMap);
     render();
 
     if (quiet && changed) showToast('新しいメッセージがあります');
