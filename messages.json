@@ -1,6 +1,17 @@
 {
-  "updated": "2026-08-07 18:46",
+  "updated": "2026-08-07 18:49",
   "messages": [
+    {
+      "id": "c6873282222aca8f936d323f76a11b1b",
+      "dest": "社内グループLINE",
+      "tone": "⑤グループLINE",
+      "toneClass": "tone-group",
+      "type": "グループ",
+      "message": "お疲れさまです！\nこんな遅くに金物屋まで行ってくれたんですね、ありがとうございます！助かります🙏\n遅くまでお疲れさまでした！",
+      "priority": "mid",
+      "priorityLabel": "🟡ふつう",
+      "created": "2026-08-07 18:49"
+    },
     {
       "id": "43f3c5d1ca3847eaf1cfa13d14a603a7",
       "dest": "社内グループLINE",
