@@ -1,6 +1,17 @@
 {
-  "updated": "2026-08-08 21:20",
+  "updated": "2026-08-08 21:22",
   "messages": [
+    {
+      "id": "1983ee414aa705ab537b44af66ea6900",
+      "dest": "テスト",
+      "tone": "③ふつう",
+      "toneClass": "tone-normal",
+      "type": "個人",
+      "message": "即反映テスト！見えたらすぐ引っ張って更新してね！",
+      "priority": "low",
+      "priorityLabel": "🟢あとで",
+      "created": "2026-08-08 21:22"
+    },
     {
       "id": "d1d7e95e90e0788f275623f5db63bb09",
       "dest": "酒井さん",
