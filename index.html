@@ -10,12 +10,49 @@
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
+  html, body {
+    overscroll-behavior-y: contain;
+  }
+
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sans JP', sans-serif;
     background: #f0f2f5;
     color: #333;
     min-height: 100vh;
     padding-bottom: calc(80px + env(safe-area-inset-bottom));
+  }
+
+  /* プルダウン更新インジケーター */
+  .pull-indicator {
+    text-align: center;
+    height: 0;
+    overflow: hidden;
+    transition: height 0.25s ease;
+    background: #f0f2f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: #06c755;
+  }
+  .pull-indicator.pulling {
+    transition: none;
+  }
+  .pull-indicator .pull-icon {
+    display: inline-block;
+    font-size: 22px;
+    transition: transform 0.2s ease;
+  }
+  .pull-indicator.ready .pull-icon {
+    transform: rotate(180deg);
+  }
+  .pull-indicator.refreshing .pull-icon {
+    animation: pull-spin 0.8s linear infinite;
+  }
+  @keyframes pull-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
   }
 
   /* ヘッダー */
@@ -375,6 +412,11 @@
     <button class="refresh-btn" id="clearBtn" style="display:none" title="送信済みを一覧から消す">🗑</button>
   </h1>
   <div class="subtitle" id="subtitle">コピーしてLINEに貼り付け</div>
+</div>
+
+<div class="pull-indicator" id="pullIndicator">
+  <span class="pull-icon">↓</span>
+  <span class="pull-text">&nbsp;引っぱって更新</span>
 </div>
 
 <div class="tabs" id="tabs">
@@ -837,6 +879,78 @@ async function loadData(quiet) {
   } catch (e) {
     if (!quiet) showLoadError(e.message);
   }
+}
+
+// ===== プルダウン更新 =====
+{
+  const pullEl = document.getElementById('pullIndicator');
+  const pullIcon = pullEl.querySelector('.pull-icon');
+  const pullText = pullEl.querySelector('.pull-text');
+  const THRESHOLD = 70;   // この距離以上引いたら更新
+  const MAX_PULL = 120;
+  let startY = 0;
+  let pulling = false;
+  let refreshing = false;
+
+  document.addEventListener('touchstart', e => {
+    if (refreshing) return;
+    // ページ最上部付近のときだけ有効
+    if (window.scrollY > 5) return;
+    startY = e.touches[0].clientY;
+    pulling = true;
+    pullEl.classList.add('pulling');
+    pullEl.classList.remove('ready', 'refreshing');
+  }, { passive: true });
+
+  document.addEventListener('touchmove', e => {
+    if (!pulling || refreshing) return;
+    const dy = e.touches[0].clientY - startY;
+    if (dy < 0) { // 上スクロール
+      pullEl.style.height = '0px';
+      return;
+    }
+    // 引っ張り距離に応じてインジケーターを伸ばす（減衰つき）
+    const dist = Math.min(dy * 0.5, MAX_PULL);
+    pullEl.style.height = dist + 'px';
+
+    if (dist >= THRESHOLD) {
+      pullEl.classList.add('ready');
+      pullText.innerHTML = '&nbsp;離して更新';
+    } else {
+      pullEl.classList.remove('ready');
+      pullText.innerHTML = '&nbsp;引っぱって更新';
+    }
+  }, { passive: true });
+
+  document.addEventListener('touchend', async () => {
+    if (!pulling || refreshing) return;
+    pulling = false;
+    pullEl.classList.remove('pulling');
+
+    const h = parseFloat(pullEl.style.height) || 0;
+    if (h >= THRESHOLD) {
+      // 更新実行
+      refreshing = true;
+      pullEl.classList.remove('ready');
+      pullEl.classList.add('refreshing');
+      pullEl.style.height = '50px';
+      pullIcon.textContent = '🔄';
+      pullText.innerHTML = '&nbsp;更新中…';
+
+      const before = messages.length;
+      await loadData(true);
+      showToast(messages.length > before ? '新しいメッセージがあります' : '最新の状態です');
+
+      pullEl.classList.remove('refreshing');
+      pullEl.style.height = '0px';
+      pullIcon.textContent = '↓';
+      pullText.innerHTML = '&nbsp;引っぱって更新';
+      refreshing = false;
+    } else {
+      // 閾値未満 → 戻す
+      pullEl.style.height = '0px';
+    }
+  });
 }
 
 // アプリに戻ってきたら、黙って最新を取り直す
