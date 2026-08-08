@@ -1,6 +1,17 @@
 {
-  "updated": "2026-08-08 21:22",
+  "updated": "2026-08-08 21:23",
   "messages": [
+    {
+      "id": "bf471e5124b020adbe431a73ff8d61c7",
+      "dest": "家族",
+      "tone": "④友達",
+      "toneClass": "tone-friend",
+      "type": "個人",
+      "message": "今日も夜まで暑いね〜💦\nちなみに明日の朝って何時くらいに起きる予定？もしよかったら教えて🙏",
+      "priority": "mid",
+      "priorityLabel": "🟡ふつう",
+      "created": "2026-08-08 21:23"
+    },
     {
       "id": "1983ee414aa705ab537b44af66ea6900",
       "dest": "テスト",
