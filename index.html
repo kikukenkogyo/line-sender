@@ -947,8 +947,10 @@ function showLoadError(detail) {
 async function loadData(quiet) {
   if (!quiet) showLoading();
   try {
-    // ?t=... と no-store で、必ず最新を取りに行く（キャッシュ対策）
-    const res = await fetch('messages.json?t=' + Date.now(), { cache: 'no-store' });
+    // GitHub raw から直接取得（Pages のビルド待ちをスキップして即反映）
+    // ?t=... と no-store で、ブラウザキャッシュも回避
+    const RAW_URL = 'https://raw.githubusercontent.com/kikukenkogyo/line-sender/main/messages.json';
+    const res = await fetch(RAW_URL + '?t=' + Date.now(), { cache: 'no-store' });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
 
