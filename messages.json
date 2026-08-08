@@ -1,6 +1,17 @@
 {
-  "updated": "2026-08-08 19:17",
+  "updated": "2026-08-08 21:11",
   "messages": [
+    {
+      "id": "260f466445cea3bdba44ae1ee5d0b084",
+      "dest": "テスト",
+      "tone": "③ふつう",
+      "toneClass": "tone-normal",
+      "type": "個人",
+      "message": "反映テスト2回目！これが見えたら即反映OK！",
+      "priority": "low",
+      "priorityLabel": "🟢あとで",
+      "created": "2026-08-08 21:11"
+    },
     {
       "id": "21b63d3ff9c1bb2d8bce5948c1cbaf40",
       "dest": "テスト",
