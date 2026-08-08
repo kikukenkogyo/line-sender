@@ -1,6 +1,17 @@
 {
-  "updated": "2026-08-08 21:18",
+  "updated": "2026-08-08 21:20",
   "messages": [
+    {
+      "id": "d1d7e95e90e0788f275623f5db63bb09",
+      "dest": "酒井さん",
+      "tone": "③ふつう",
+      "toneClass": "tone-normal",
+      "type": "個人",
+      "message": "【新しいアプリURL】\nhttps://kikukenkogyo.github.io/line-sender/app.html\n\nこのURLを開いてください。キャッシュが無い最新版です。",
+      "priority": "high",
+      "priorityLabel": "🔴急ぎ",
+      "created": "2026-08-08 21:20"
+    },
     {
       "id": "66d0ec7c44532825f40bfc3a61814204",
       "dest": "テスト",
