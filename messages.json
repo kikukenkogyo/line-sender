@@ -1,6 +1,17 @@
 {
-  "updated": "2026-08-07 18:49",
+  "updated": "2026-08-08 19:17",
   "messages": [
+    {
+      "id": "21b63d3ff9c1bb2d8bce5948c1cbaf40",
+      "dest": "テスト",
+      "tone": "③ふつう",
+      "toneClass": "tone-normal",
+      "type": "個人",
+      "message": "反映スピードのテストです。このメッセージが見えたら成功！",
+      "priority": "low",
+      "priorityLabel": "🟢あとで",
+      "created": "2026-08-08 19:17"
+    },
     {
       "id": "c6873282222aca8f936d323f76a11b1b",
       "dest": "社内グループLINE",
