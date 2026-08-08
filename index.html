@@ -17,7 +17,7 @@
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sans JP', sans-serif;
     background: #f0f2f5;
-    color: #333;
+    color: #111;
     min-height: 100vh;
     padding-bottom: calc(80px + env(safe-area-inset-bottom));
   }
@@ -111,9 +111,9 @@
     flex: 1;
     padding: 9px 4px;
     background: #fff;
-    border: 1px solid #ddd;
+    border: 1px solid #ccc;
     border-radius: 10px;
-    color: #666;
+    color: #333;
     font-size: 13px;
     font-weight: 600;
     font-family: inherit;
@@ -144,15 +144,15 @@
     background: #fff;
     border-radius: 16px;
     overflow: hidden;
-    border: 1px solid #e0e0e0;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    border: 1px solid #ddd;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
     transition: opacity 0.25s ease, border-color 0.25s ease;
   }
   .card.sent {
     opacity: 0.5;
-    border-color: #e8e8e8;
+    border-color: #e0e0e0;
   }
-  .card.sent .message-text { color: #bbb; }
+  .card.sent .message-text { color: #888; }
   .card-header {
     padding: 14px 16px 10px;
     display: flex;
@@ -163,21 +163,21 @@
   .card-header .dest {
     font-size: 16px;
     font-weight: 600;
-    color: #1a1a1a;
+    color: #000;
   }
   .card-header .tone-badge {
     font-size: 11px;
     padding: 3px 8px;
     border-radius: 6px;
-    font-weight: 500;
+    font-weight: 600;
     margin-left: auto;
     white-space: nowrap;
   }
-  .tone-group { background: #f3e8ff; color: #7c3aed; border: 1px solid #d8b4fe; }
-  .tone-friend { background: #fff7ed; color: #ea580c; border: 1px solid #fdba74; }
-  .tone-work { background: #e8f5e9; color: #16a34a; border: 1px solid #86efac; }
-  .tone-normal { background: #f3f4f6; color: #6b7280; border: 1px solid #d1d5db; }
-  .tone-polite { background: #eff6ff; color: #2563eb; border: 1px solid #93c5fd; }
+  .tone-group { background: #f3e8ff; color: #6d28d9; border: 1px solid #c4b5fd; }
+  .tone-friend { background: #fff7ed; color: #c2410c; border: 1px solid #fb923c; }
+  .tone-work { background: #e8f5e9; color: #15803d; border: 1px solid #6ee7a0; }
+  .tone-normal { background: #f3f4f6; color: #4b5563; border: 1px solid #9ca3af; }
+  .tone-polite { background: #eff6ff; color: #1d4ed8; border: 1px solid #60a5fa; }
 
   .priority-dot {
     width: 10px;
@@ -196,7 +196,7 @@
   .message-text {
     font-size: 15px;
     line-height: 1.7;
-    color: #333;
+    color: #111;
     white-space: pre-wrap;
     word-break: break-word;
   }
@@ -223,10 +223,10 @@
   .card-meta {
     padding: 0 16px 6px;
     font-size: 11px;
-    color: #999;
+    color: #555;
   }
   .card-meta .sent-at {
-    color: #6366f1;
+    color: #4f46e5;
   }
 
   /* ボタンエリア */
@@ -270,12 +270,12 @@
   }
   .btn-done {
     background: #f0f0f0;
-    color: #666;
+    color: #333;
     flex: 0.7;
   }
   .btn-done.checked {
     background: #e8eaf6;
-    color: #5c6bc0;
+    color: #4338ca;
     flex: 0.9;
   }
   .btn-delete {
@@ -288,11 +288,33 @@
     background: #fee2e2;
   }
 
+  /* 全件消去ボタン */
+  .btn-clear-all {
+    display: block;
+    width: 100%;
+    margin: 16px auto 0;
+    padding: 14px;
+    background: #dc2626;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.2s ease, transform 0.15s ease;
+  }
+  .btn-clear-all:active {
+    background: #b91c1c;
+    transform: scale(0.97);
+  }
+
   /* 空状態 */
   .empty-state {
     text-align: center;
     padding: 60px 20px;
-    color: #999;
+    color: #555;
   }
   .empty-state .icon {
     font-size: 48px;
@@ -300,7 +322,7 @@
   }
   .empty-state h2 {
     font-size: 18px;
-    color: #666;
+    color: #333;
     margin-bottom: 8px;
   }
   .empty-state p { font-size: 13px; }
@@ -331,13 +353,13 @@
     text-align: center;
     padding: 16px;
     font-size: 11px;
-    color: #999;
+    color: #555;
     line-height: 1.8;
   }
   .reset-btn {
     background: none;
     border: none;
-    color: #888;
+    color: #555;
     font-size: 11px;
     font-family: inherit;
     text-decoration: underline;
@@ -350,7 +372,7 @@
     width: 100%;
     min-height: 120px;
     background: #f9f9f9;
-    color: #333;
+    color: #111;
     border: 1px solid #06c755;
     border-radius: 10px;
     padding: 12px;
@@ -375,24 +397,24 @@
   }
   .btn-cancel {
     background: #f0f0f0;
-    color: #666;
+    color: #333;
   }
   .btn-edit {
     background: #f0f0f0;
-    color: #666;
+    color: #333;
     flex: 0 0 48px;
     font-size: 16px;
   }
   .edited-badge {
     display: inline-block;
     font-size: 10px;
-    color: #d97706;
+    color: #b45309;
     margin-left: 6px;
   }
   .btn-revert {
     background: none;
     border: none;
-    color: #d97706;
+    color: #b45309;
     font-size: 10px;
     font-family: inherit;
     text-decoration: underline;
@@ -547,6 +569,9 @@ function render() {
   if (hid > 0) {
     footer += `<br><button class="reset-btn" id="restoreBtn">消した${hid}件を元に戻す</button>`;
   }
+  if (all.length > 0) {
+    footer += '<br><button class="btn-clear-all" id="clearAllBtn">🗑 全件消去</button>';
+  }
   document.getElementById('updateInfo').innerHTML = footer;
 }
 
@@ -689,11 +714,26 @@ function deleteMsg(id) {
   const m = messages.find(x => x.id === id);
   if (!m) return;
   const dest = m.dest.length > 15 ? m.dest.slice(0, 15) + '…' : m.dest;
-  if (!confirm(`「${dest}」のメッセージを消去しますか？\n（元に戻すこともできます）`)) return;
+  if (!confirm(`「${dest}」のメッセージを消去しますか？`)) return;
   hiddenMap[id] = nowLabel();
   saveMap(HIDDEN_KEY, hiddenMap);
   render();
   showToast('消去しました');
+}
+
+// 全件消去（表示中のメッセージをすべて一覧から消す）
+function clearAllMessages() {
+  const targets = sortedMessages();
+  if (targets.length === 0) {
+    showToast('消去するメッセージがありません');
+    return;
+  }
+  if (!confirm(`表示中の${targets.length}件を全件消去します。よろしいですか？`)) return;
+  const now = nowLabel();
+  for (const m of targets) hiddenMap[m.id] = now;
+  saveMap(HIDDEN_KEY, hiddenMap);
+  render();
+  showToast(`${targets.length}件を消去しました`);
 }
 
 // 送信済みをまとめて一覧から消す（元データは残る）
@@ -820,6 +860,10 @@ document.getElementById('tabs').addEventListener('click', e => {
 });
 
 document.getElementById('updateInfo').addEventListener('click', e => {
+  if (e.target.closest('#clearAllBtn')) {
+    clearAllMessages();
+    return;
+  }
   if (e.target.closest('#restoreBtn')) {
     restoreHidden();
     return;
