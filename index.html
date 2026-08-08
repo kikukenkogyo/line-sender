@@ -12,8 +12,8 @@
 
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sans JP', sans-serif;
-    background: #0a0a0a;
-    color: #e0e0e0;
+    background: #f0f2f5;
+    color: #333;
     min-height: 100vh;
     padding-bottom: calc(80px + env(safe-area-inset-bottom));
   }
@@ -73,10 +73,10 @@
   .tab {
     flex: 1;
     padding: 9px 4px;
-    background: #161616;
-    border: 1px solid #2a2a2a;
+    background: #fff;
+    border: 1px solid #ddd;
     border-radius: 10px;
-    color: #888;
+    color: #666;
     font-size: 13px;
     font-weight: 600;
     font-family: inherit;
@@ -86,9 +86,9 @@
   }
   .tab:active { transform: scale(0.97); }
   .tab.active {
-    background: #06c75522;
-    border-color: #06c75566;
-    color: #4ade80;
+    background: #e8f5e9;
+    border-color: #06c755;
+    color: #06c755;
   }
   .tab .num {
     font-size: 11px;
@@ -104,28 +104,29 @@
     gap: 12px;
   }
   .card {
-    background: #1a1a1a;
+    background: #fff;
     border-radius: 16px;
     overflow: hidden;
-    border: 1px solid #2a2a2a;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
     transition: opacity 0.25s ease, border-color 0.25s ease;
   }
   .card.sent {
     opacity: 0.5;
-    border-color: #232323;
+    border-color: #e8e8e8;
   }
-  .card.sent .message-text { color: #8a8a8a; }
+  .card.sent .message-text { color: #bbb; }
   .card-header {
     padding: 14px 16px 10px;
     display: flex;
     align-items: center;
     gap: 10px;
-    border-bottom: 1px solid #2a2a2a;
+    border-bottom: 1px solid #eee;
   }
   .card-header .dest {
     font-size: 16px;
     font-weight: 600;
-    color: #fff;
+    color: #1a1a1a;
   }
   .card-header .tone-badge {
     font-size: 11px;
@@ -135,11 +136,11 @@
     margin-left: auto;
     white-space: nowrap;
   }
-  .tone-group { background: #7c3aed22; color: #a78bfa; border: 1px solid #7c3aed44; }
-  .tone-friend { background: #f9731622; color: #fb923c; border: 1px solid #f9731644; }
-  .tone-work { background: #06c75522; color: #4ade80; border: 1px solid #06c75544; }
-  .tone-normal { background: #6b728022; color: #9ca3af; border: 1px solid #6b728044; }
-  .tone-polite { background: #3b82f622; color: #60a5fa; border: 1px solid #3b82f644; }
+  .tone-group { background: #f3e8ff; color: #7c3aed; border: 1px solid #d8b4fe; }
+  .tone-friend { background: #fff7ed; color: #ea580c; border: 1px solid #fdba74; }
+  .tone-work { background: #e8f5e9; color: #16a34a; border: 1px solid #86efac; }
+  .tone-normal { background: #f3f4f6; color: #6b7280; border: 1px solid #d1d5db; }
+  .tone-polite { background: #eff6ff; color: #2563eb; border: 1px solid #93c5fd; }
 
   .priority-dot {
     width: 10px;
@@ -147,9 +148,9 @@
     border-radius: 50%;
     flex-shrink: 0;
   }
-  .priority-high { background: #ef4444; box-shadow: 0 0 8px #ef444488; }
-  .priority-mid { background: #eab308; box-shadow: 0 0 8px #eab30888; }
-  .priority-low { background: #22c55e; box-shadow: 0 0 8px #22c55e88; }
+  .priority-high { background: #ef4444; box-shadow: 0 0 8px #ef444466; }
+  .priority-mid { background: #eab308; box-shadow: 0 0 8px #eab30866; }
+  .priority-low { background: #22c55e; box-shadow: 0 0 8px #22c55e66; }
 
   /* メッセージ本文 */
   .card-body {
@@ -158,7 +159,7 @@
   .message-text {
     font-size: 15px;
     line-height: 1.7;
-    color: #d4d4d4;
+    color: #333;
     white-space: pre-wrap;
     word-break: break-word;
   }
@@ -185,10 +186,10 @@
   .card-meta {
     padding: 0 16px 6px;
     font-size: 11px;
-    color: #666;
+    color: #999;
   }
   .card-meta .sent-at {
-    color: #818cf8;
+    color: #6366f1;
   }
 
   /* ボタンエリア */
@@ -225,27 +226,36 @@
     background: #1d4ed8;
   }
   .btn-line {
-    background: #223022;
-    color: #4ade80;
-    flex: 0 0 52px;
+    background: #e8f5e9;
+    color: #06c755;
+    flex: 0 0 48px;
     font-size: 18px;
   }
   .btn-done {
-    background: #2a2a2a;
-    color: #999;
+    background: #f0f0f0;
+    color: #666;
     flex: 0.7;
   }
   .btn-done.checked {
-    background: #1a1a2e;
-    color: #818cf8;
+    background: #e8eaf6;
+    color: #5c6bc0;
     flex: 0.9;
+  }
+  .btn-delete {
+    background: #fef2f2;
+    color: #dc2626;
+    flex: 0 0 48px;
+    font-size: 16px;
+  }
+  .btn-delete:active {
+    background: #fee2e2;
   }
 
   /* 空状態 */
   .empty-state {
     text-align: center;
     padding: 60px 20px;
-    color: #666;
+    color: #999;
   }
   .empty-state .icon {
     font-size: 48px;
@@ -253,7 +263,7 @@
   }
   .empty-state h2 {
     font-size: 18px;
-    color: #888;
+    color: #666;
     margin-bottom: 8px;
   }
   .empty-state p { font-size: 13px; }
@@ -284,13 +294,13 @@
     text-align: center;
     padding: 16px;
     font-size: 11px;
-    color: #444;
+    color: #999;
     line-height: 1.8;
   }
   .reset-btn {
     background: none;
     border: none;
-    color: #555;
+    color: #888;
     font-size: 11px;
     font-family: inherit;
     text-decoration: underline;
@@ -302,8 +312,8 @@
   .edit-area {
     width: 100%;
     min-height: 120px;
-    background: #111;
-    color: #e0e0e0;
+    background: #f9f9f9;
+    color: #333;
     border: 1px solid #06c755;
     border-radius: 10px;
     padding: 12px;
@@ -327,25 +337,25 @@
     color: #fff;
   }
   .btn-cancel {
-    background: #2a2a2a;
-    color: #999;
+    background: #f0f0f0;
+    color: #666;
   }
   .btn-edit {
-    background: #2a2a2a;
-    color: #999;
-    flex: 0 0 52px;
+    background: #f0f0f0;
+    color: #666;
+    flex: 0 0 48px;
     font-size: 16px;
   }
   .edited-badge {
     display: inline-block;
     font-size: 10px;
-    color: #f59e0b;
+    color: #d97706;
     margin-left: 6px;
   }
   .btn-revert {
     background: none;
     border: none;
-    color: #f59e0b;
+    color: #d97706;
     font-size: 10px;
     font-family: inherit;
     text-decoration: underline;
@@ -571,6 +581,7 @@ function createCard(m) {
         <button class="btn btn-done ${done ? 'checked' : ''}" data-action="done" data-id="${m.id}">
           ${done ? '↩ 取り消し' : '✅ 送信済み'}
         </button>
+        <button class="btn btn-delete" data-action="delete" data-id="${m.id}" title="消去">🗑</button>
       </div>
     </div>`;
 }
@@ -629,6 +640,18 @@ function toggleDone(id) {
     render();
     showToast('送信済みにしました');
   }
+}
+
+// 個別メッセージを消去（一覧から消す）
+function deleteMsg(id) {
+  const m = messages.find(x => x.id === id);
+  if (!m) return;
+  const dest = m.dest.length > 15 ? m.dest.slice(0, 15) + '…' : m.dest;
+  if (!confirm(`「${dest}」のメッセージを消去しますか？\n（元に戻すこともできます）`)) return;
+  hiddenMap[id] = nowLabel();
+  saveMap(HIDDEN_KEY, hiddenMap);
+  render();
+  showToast('消去しました');
 }
 
 // 送信済みをまとめて一覧から消す（元データは残る）
@@ -742,6 +765,7 @@ document.getElementById('cardList').addEventListener('click', e => {
     case 'editSave': saveEdit(id); break;
     case 'editCancel': cancelEdit(id); break;
     case 'revert': revertEdit(id); break;
+    case 'delete': deleteMsg(id); break;
   }
 });
 
