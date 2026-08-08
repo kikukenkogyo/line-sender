@@ -1,6 +1,17 @@
 {
-  "updated": "2026-08-08 21:11",
+  "updated": "2026-08-08 21:18",
   "messages": [
+    {
+      "id": "66d0ec7c44532825f40bfc3a61814204",
+      "dest": "テスト",
+      "tone": "③ふつう",
+      "toneClass": "tone-normal",
+      "type": "個人",
+      "message": "速度テスト3回目！すぐ見えたら成功！",
+      "priority": "low",
+      "priorityLabel": "🟢あとで",
+      "created": "2026-08-08 21:18"
+    },
     {
       "id": "260f466445cea3bdba44ae1ee5d0b084",
       "dest": "テスト",
