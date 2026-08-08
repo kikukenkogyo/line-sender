@@ -930,10 +930,12 @@ function showLoadError(detail) {
 async function loadData(quiet) {
   if (!quiet) showLoading();
   try {
-    // GitHub raw から直接取得（Pages のビルド待ちをスキップして即反映）
-    // ?t=... と no-store で、ブラウザキャッシュも回避
-    const RAW_URL = 'https://raw.githubusercontent.com/kikukenkogyo/line-sender/main/messages.json';
-    const res = await fetch(RAW_URL + '?t=' + Date.now(), { cache: 'no-store' });
+    // GitHub API から直接取得（CDNキャッシュを回避して常に最新）
+    const API_URL = 'https://api.github.com/repos/kikukenkogyo/line-sender/contents/messages.json';
+    const res = await fetch(API_URL + '?ref=main&t=' + Date.now(), {
+      cache: 'no-store',
+      headers: { 'Accept': 'application/vnd.github.raw' }
+    });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
 
