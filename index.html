@@ -447,7 +447,6 @@
 <div class="tabs" id="tabs">
   <button class="tab active" data-filter="todo">未送信<span class="num" id="numTodo"></span></button>
   <button class="tab" data-filter="sent">送信済み<span class="num" id="numSent"></span></button>
-  <button class="tab" data-filter="all">すべて<span class="num" id="numAll"></span></button>
 </div>
 
 <div class="card-list" id="cardList"></div>
@@ -546,11 +545,8 @@ function render() {
   document.getElementById('count').textContent = todo.length + '件';
   document.getElementById('numTodo').textContent = todo.length;
   document.getElementById('numSent').textContent = sent.length;
-  document.getElementById('numAll').textContent = all.length;
 
-  const shown = currentFilter === 'todo' ? todo
-              : currentFilter === 'sent' ? sent
-              : all;
+  const shown = currentFilter === 'todo' ? todo : sent;
 
   if (shown.length === 0) {
     list.innerHTML = emptyState();
@@ -568,7 +564,7 @@ function render() {
 
   let footer = '最終更新: ' + escHtml(lastUpdated)
     + '<br><button class="reset-btn" id="resetBtn">送信済みマークをすべて解除する</button>';
-  if (shown.length > 0 && (currentFilter === 'sent' || currentFilter === 'all')) {
+  if (shown.length > 0 && currentFilter === 'sent') {
     footer += '<br><button class="btn-clear-all" id="clearAllBtn">🗑 全件消去</button>';
   }
   document.getElementById('updateInfo').innerHTML = footer;
@@ -581,14 +577,6 @@ function emptyState() {
         <div class="icon">📭</div>
         <h2>送信済みはまだありません</h2>
         <p>送ったら「送信済み」を押してください</p>
-      </div>`;
-  }
-  if (currentFilter === 'all') {
-    return `
-      <div class="empty-state">
-        <div class="icon">📝</div>
-        <h2>メッセージがありません</h2>
-        <p>新しい依頼があると、ここに追加されます</p>
       </div>`;
   }
   return `
@@ -851,7 +839,7 @@ document.getElementById('cardList').addEventListener('click', e => {
 });
 
 // タブ切替の共通関数
-const TAB_ORDER = ['todo', 'sent', 'all'];
+const TAB_ORDER = ['todo', 'sent'];
 
 function switchTab(filter) {
   currentFilter = filter;
