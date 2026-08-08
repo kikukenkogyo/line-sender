@@ -851,13 +851,60 @@ document.getElementById('cardList').addEventListener('click', e => {
   }
 });
 
+// タブ切替の共通関数
+const TAB_ORDER = ['todo', 'sent', 'all'];
+
+function switchTab(filter) {
+  currentFilter = filter;
+  document.querySelectorAll('.tab').forEach(t =>
+    t.classList.toggle('active', t.dataset.filter === filter)
+  );
+  render();
+  window.scrollTo({ top: 0 });
+}
+
 document.getElementById('tabs').addEventListener('click', e => {
   const tab = e.target.closest('.tab');
   if (!tab) return;
-  currentFilter = tab.dataset.filter;
-  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === tab));
-  render();
+  switchTab(tab.dataset.filter);
 });
+
+// ===== 左右スワイプでタブ切替 =====
+{
+  let swStartX = 0;
+  let swStartY = 0;
+  let swActive = false;
+
+  document.getElementById('cardList').addEventListener('touchstart', e => {
+    swStartX = e.touches[0].clientX;
+    swStartY = e.touches[0].clientY;
+    swActive = true;
+  }, { passive: true });
+
+  document.getElementById('cardList').addEventListener('touchmove', e => {
+    if (!swActive) return;
+    // 縦移動が大きくなったらスワイプ候補から外す（通常スクロール）
+    const dy = Math.abs(e.touches[0].clientY - swStartY);
+    if (dy > 30) swActive = false;
+  }, { passive: true });
+
+  document.getElementById('cardList').addEventListener('touchend', e => {
+    if (!swActive) return;
+    swActive = false;
+    const dx = e.changedTouches[0].clientX - swStartX;
+    const dy = e.changedTouches[0].clientY - swStartY;
+
+    // 水平50px以上 かつ 水平が垂直の2倍以上 → スワイプ
+    if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 2) return;
+
+    const idx = TAB_ORDER.indexOf(currentFilter);
+    if (dx < 0 && idx < TAB_ORDER.length - 1) {
+      switchTab(TAB_ORDER[idx + 1]); // ← 左スワイプ → 次のタブ
+    } else if (dx > 0 && idx > 0) {
+      switchTab(TAB_ORDER[idx - 1]); // → 右スワイプ → 前のタブ
+    }
+  }, { passive: true });
+}
 
 document.getElementById('updateInfo').addEventListener('click', e => {
   if (e.target.closest('#clearAllBtn')) {
