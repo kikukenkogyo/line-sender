@@ -566,13 +566,9 @@ function render() {
   clearBtn.style.display = sent.length > 0 ? '' : 'none';
   clearBtn.title = `送信済み${sent.length}件を一覧から消す`;
 
-  const hid = hiddenCount();
   let footer = '最終更新: ' + escHtml(lastUpdated)
     + '<br><button class="reset-btn" id="resetBtn">送信済みマークをすべて解除する</button>';
-  if (hid > 0) {
-    footer += `<br><button class="reset-btn" id="restoreBtn">消した${hid}件を元に戻す</button>`;
-  }
-  if (all.length > 0) {
+  if (shown.length > 0 && (currentFilter === 'sent' || currentFilter === 'all')) {
     footer += '<br><button class="btn-clear-all" id="clearAllBtn">🗑 全件消去</button>';
   }
   document.getElementById('updateInfo').innerHTML = footer;
@@ -912,10 +908,6 @@ document.getElementById('tabs').addEventListener('click', e => {
 document.getElementById('updateInfo').addEventListener('click', e => {
   if (e.target.closest('#clearAllBtn')) {
     clearAllMessages();
-    return;
-  }
-  if (e.target.closest('#restoreBtn')) {
-    restoreHidden();
     return;
   }
   if (!e.target.closest('#resetBtn')) return;
