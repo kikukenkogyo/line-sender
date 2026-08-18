@@ -1,6 +1,28 @@
 {
-  "updated": "2026-08-18 17:51",
+  "updated": "2026-08-18 18:43",
   "messages": [
+    {
+      "id": "59976c14184e0c6e8f0e5e32cf08fc32",
+      "dest": "宮内さん",
+      "tone": "②仕事",
+      "toneClass": "tone-work",
+      "type": "仕事",
+      "message": "お疲れさまでした。\n有給取得の件、了解しました。\n事務所に連絡入れておいてください。",
+      "priority": "mid",
+      "priorityLabel": "🟡ふつう",
+      "created": "2026-08-18 18:43"
+    },
+    {
+      "id": "49f20dbdfb8e299294aa8193311ea069",
+      "dest": "宮内さん",
+      "tone": "②仕事",
+      "toneClass": "tone-work",
+      "type": "仕事",
+      "message": "お疲れさまです。\n明日の夕方の件ですが、申し訳ないですが用事が入ってしまっていまして、明後日ではいかがでしょうか？",
+      "priority": "mid",
+      "priorityLabel": "🟡ふつう",
+      "created": "2026-08-18 18:43"
+    },
     {
       "id": "66569cc386b789345fe7986a7820e498",
       "dest": "一ノ瀬さん",
