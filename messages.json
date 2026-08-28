@@ -1,17 +1,6 @@
 {
-  "updated": "2026-08-28 09:21",
+  "updated": "2026-08-28 09:22",
   "messages": [
-    {
-      "id": "d1eb5a0a43d58ba83efbad9b07bdbaad",
-      "dest": "社内グループLINE",
-      "tone": "⑤グループLINE",
-      "toneClass": "tone-group",
-      "type": "グループ",
-      "message": "お疲れ様です！\n\n明日8/29（土）ですが、第5土曜日のため通常出勤日となります。\nお間違えのないよう、よろしくお願いします！\n\n隔週休みの週と紛らわしいですが、皆さんご確認ください。\nよろしくお願いします🙇",
-      "priority": "high",
-      "priorityLabel": "🔴急ぎ",
-      "created": "2026-08-28 09:21"
-    },
     {
       "id": "ee176fcb3758d68a1df1e3127402b383",
       "dest": "社内グループLINE",
