@@ -1,6 +1,17 @@
 {
-  "updated": "2026-08-28 09:22",
+  "updated": "2026-08-28 09:23",
   "messages": [
+    {
+      "id": "a9c54cf6156fbea94670e29017f49c9a",
+      "dest": "社内グループLINE",
+      "tone": "⑤グループLINE",
+      "toneClass": "tone-group",
+      "type": "グループ",
+      "message": "お疲れ様です！\n\n明日8/29（土）は第5土曜日なので、出勤をお願いします！\nみんなよろしく🙇",
+      "priority": "high",
+      "priorityLabel": "🔴急ぎ",
+      "created": "2026-08-28 09:23"
+    },
     {
       "id": "ee176fcb3758d68a1df1e3127402b383",
       "dest": "社内グループLINE",
