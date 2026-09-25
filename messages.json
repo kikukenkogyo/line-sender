@@ -1,6 +1,17 @@
 {
-  "updated": "2026-09-24 15:24",
+  "updated": "2026-09-25 21:06",
   "messages": [
+    {
+      "id": "54b8c5c435fb67ee5ed63ee195d2fd2e",
+      "dest": "社内グループLINE",
+      "tone": "⑤グループLINE",
+      "toneClass": "tone-group",
+      "type": "グループ",
+      "message": "お疲れ様です！\n菊建ページのアドレスが変わりました。\n今日から下のアドレスから見てください。\n\nhttps://kikuken-page55789544163625.notion.site/b6f3c51f6fc68297aa850137011e46a6\n\n前のアドレスはもう開けません。\nスマホのホーム画面やブックマークに入れている人は、新しいアドレスで入れ直してください。\n\n置場・工場のタブレットと作業日報は、今までどおり使えます。\nわからないことがあれば連絡ください。",
+      "priority": "high",
+      "priorityLabel": "🔴急ぎ",
+      "created": "2026-09-25 21:06"
+    },
     {
       "id": "d5866d9df2ddfff38e840322b313d55a",
       "dest": "社内グループLINE",
