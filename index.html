@@ -566,7 +566,8 @@ function render() {
     + '<br><button class="reset-btn" id="resetBtn">送信済みマークをすべて解除する</button>';
   const hidden = hiddenCount();
   if (hidden > 0) {
-    footer += '<br><button class="reset-btn" id="restoreBtn">🗑 消したメッセージ ' + hidden + ' 件を元に戻す</button>';
+    footer += '<br><button class="reset-btn" id="restoreLastBtn">↩ 直前に消したメッセージを元に戻す</button>';
+    footer += '<br><button class="reset-btn" id="restoreBtn">消したメッセージ ' + hidden + ' 件をすべて元に戻す</button>';
   }
   if (shown.length > 0 && currentFilter === 'sent') {
     footer += '<br><button class="btn-clear-all" id="clearAllBtn">🗑 全件消去</button>';
@@ -706,7 +707,7 @@ function deleteMsg(id) {
   if (!m) return;
   const dest = m.dest.length > 15 ? m.dest.slice(0, 15) + '…' : m.dest;
   if (!confirm(`「${dest}」のメッセージを消去しますか？`)) return;
-  hiddenMap[id] = nowLabel();
+  hiddenMap[id] = nowLabel() + ':' + String(new Date().getSeconds()).padStart(2, '0');
   saveMap(HIDDEN_KEY, hiddenMap);
   render();
   showToast('消去しました');
@@ -743,14 +744,27 @@ function clearSent() {
   showToast(`${targets.length}件を消しました`);
 }
 
-// 消したものを元に戻す
+// 消したものを全部元に戻す
 function restoreHidden() {
   const n = hiddenCount();
   if (n === 0) return;
+  if (!confirm(`消したメッセージ ${n} 件をすべて一覧に戻します。よろしいですか？`)) return;
   hiddenMap = {};
   saveMap(HIDDEN_KEY, hiddenMap);
   render();
   showToast(`${n}件を元に戻しました`);
+}
+
+// 直前に消したものだけ元に戻す（同じ操作で一度に消した分は一緒に戻る）
+function restoreLastHidden() {
+  const ids = Object.keys(hiddenMap).filter(id => messages.some(m => m.id === id));
+  if (ids.length === 0) return;
+  const latest = ids.map(id => String(hiddenMap[id])).sort().pop();
+  const targets = ids.filter(id => String(hiddenMap[id]) === latest);
+  for (const id of targets) delete hiddenMap[id];
+  saveMap(HIDDEN_KEY, hiddenMap);
+  render();
+  showToast(`${targets.length}件を元に戻しました`);
 }
 
 function nowLabel() {
@@ -902,6 +916,10 @@ document.getElementById('updateInfo').addEventListener('click', e => {
     clearAllMessages();
     return;
   }
+  if (e.target.closest('#restoreLastBtn')) {
+    restoreLastHidden();
+    return;
+  }
   if (e.target.closest('#restoreBtn')) {
     restoreHidden();
     return;
@@ -936,7 +954,7 @@ function showLoadError(detail) {
 }
 
 // アプリの版（画面の一番下に出ます。古い画面が残っていないか確認するため）
-const APP_VERSION = '2026-10-16c';
+const APP_VERSION = '2026-10-16d';
 
 // メッセージ一覧を取りに行く。
 // まず公開ページ上の messages.json（?t= を付けて毎回新しく取る。反映は push から1〜2分）、
