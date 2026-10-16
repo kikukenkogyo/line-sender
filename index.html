@@ -562,7 +562,7 @@ function render() {
   clearBtn.style.display = sent.length > 0 ? '' : 'none';
   clearBtn.title = `送信済み${sent.length}件を一覧から消す`;
 
-  let footer = '最終更新: ' + escHtml(lastUpdated)
+  let footer = '最終更新: ' + escHtml(lastUpdated) + '　／　アプリ版 ' + APP_VERSION
     + '<br><button class="reset-btn" id="resetBtn">送信済みマークをすべて解除する</button>';
   const hidden = hiddenCount();
   if (hidden > 0) {
@@ -935,22 +935,27 @@ function showLoadError(detail) {
   document.getElementById('updateInfo').textContent = 'エラー: ' + detail;
 }
 
-// メッセージ一覧を取りに行く。まず GitHub API（常に最新）、だめなら GitHub Pages 上のファイル（数分古い可能性あり）
+// アプリの版（画面の一番下に出ます。古い画面が残っていないか確認するため）
+const APP_VERSION = '2026-10-16c';
+
+// メッセージ一覧を取りに行く。
+// まず公開ページ上の messages.json（?t= を付けて毎回新しく取る。反映は push から1〜2分）、
+// だめなら GitHub API（回数制限あり）
 async function fetchMessages() {
-  const API_URL = 'https://api.github.com/repos/kikukenkogyo/line-sender/contents/messages.json';
   let firstError = '';
   try {
-    const res = await fetch(API_URL + '?ref=main&t=' + Date.now(), {
-      cache: 'no-store',
-      headers: { 'Accept': 'application/vnd.github.raw' }
-    });
+    const res = await fetch('./messages.json?t=' + Date.now(), { cache: 'no-store' });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     return await res.json();
   } catch (e) {
     firstError = e.message || String(e);
   }
-  const res2 = await fetch('./messages.json?t=' + Date.now(), { cache: 'no-store' });
-  if (!res2.ok) throw new Error(firstError + ' ／ 予備の読み込みも失敗 HTTP ' + res2.status);
+  const API_URL = 'https://api.github.com/repos/kikukenkogyo/line-sender/contents/messages.json';
+  const res2 = await fetch(API_URL + '?ref=main&t=' + Date.now(), {
+    cache: 'no-store',
+    headers: { 'Accept': 'application/vnd.github.raw' }
+  });
+  if (!res2.ok) throw new Error(firstError + ' ／ 予備(API)も失敗 HTTP ' + res2.status);
   return await res2.json();
 }
 
