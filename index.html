@@ -927,21 +927,35 @@ function showLoadError(detail) {
   document.getElementById('updateInfo').textContent = 'エラー: ' + detail;
 }
 
-async function loadData(quiet) {
-  if (!quiet) showLoading();
+// メッセージ一覧を取りに行く。まず GitHub API（常に最新）、だめなら GitHub Pages 上のファイル（数分古い可能性あり）
+async function fetchMessages() {
+  const API_URL = 'https://api.github.com/repos/kikukenkogyo/line-sender/contents/messages.json';
+  let firstError = '';
   try {
-    // GitHub API から直接取得（CDNキャッシュを回避して常に最新）
-    const API_URL = 'https://api.github.com/repos/kikukenkogyo/line-sender/contents/messages.json';
     const res = await fetch(API_URL + '?ref=main&t=' + Date.now(), {
       cache: 'no-store',
       headers: { 'Accept': 'application/vnd.github.raw' }
     });
     if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
+    return await res.json();
+  } catch (e) {
+    firstError = e.message || String(e);
+  }
+  const res2 = await fetch('./messages.json?t=' + Date.now(), { cache: 'no-store' });
+  if (!res2.ok) throw new Error(firstError + ' ／ 予備の読み込みも失敗 HTTP ' + res2.status);
+  return await res2.json();
+}
+
+// 戻り値 { ok, changed, error }。表示（トースト）は呼び出し側で出す
+async function loadData(quiet) {
+  if (!quiet) showLoading();
+  try {
+    const data = await fetchMessages();
 
     const list = Array.isArray(data) ? data : (data && data.messages) || [];
     const stamp = (data && data.updated) || '';
-    const changed = list.length !== messages.length;
+    const changed = stamp !== lastUpdated || list.length !== messages.length ||
+                    JSON.stringify(list) !== JSON.stringify(messages);
 
     messages = list;
     lastUpdated = stamp;
@@ -952,10 +966,11 @@ async function loadData(quiet) {
     editMap = pruneMap(editMap);
     saveMap(EDIT_KEY, editMap);
     render();
-
-    if (quiet && changed) showToast('新しいメッセージがあります');
+    return { ok: true, changed: changed };
   } catch (e) {
-    if (!quiet) showLoadError(e.message);
+    const msg = e.message || String(e);
+    if (!quiet) showLoadError(msg);
+    return { ok: false, changed: false, error: msg };
   }
 }
 
@@ -1015,9 +1030,8 @@ async function loadData(quiet) {
       pullIcon.textContent = '🔄';
       pullText.innerHTML = '&nbsp;更新中…';
 
-      const before = messages.length;
-      await loadData(true);
-      showToast(messages.length > before ? '新しいメッセージがあります' : '最新の状態です');
+      const r = await loadData(true);
+      showToast(!r.ok ? '更新できませんでした（' + r.error + '）' : (r.changed ? '新しい内容に更新しました' : '最新の状態です'));
 
       pullEl.classList.remove('refreshing');
       pullEl.style.height = '0px';
@@ -1032,18 +1046,20 @@ async function loadData(quiet) {
 }
 
 // アプリに戻ってきたら、黙って最新を取り直す
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') loadData(true);
+document.addEventListener('visibilitychange', async () => {
+  if (document.visibilityState !== 'visible') return;
+  const r = await loadData(true);
+  if (!r.ok) showToast('更新できませんでした（' + r.error + '）');
+  else if (r.changed) showToast('新しい内容に更新しました');
 });
 
 // 🔄ボタン：手動で最新を読み込む
 document.getElementById('refreshBtn').addEventListener('click', async e => {
   const btn = e.currentTarget;
   btn.classList.add('spin');
-  const before = messages.length;
-  await loadData(true);
+  const r = await loadData(true);
   setTimeout(() => btn.classList.remove('spin'), 400);
-  showToast(messages.length > before ? '新しいメッセージがあります' : '最新の状態です');
+  showToast(!r.ok ? '更新できませんでした（' + r.error + '）' : (r.changed ? '新しい内容に更新しました' : '最新の状態です'));
 });
 
 loadData(false);
