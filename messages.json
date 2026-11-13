@@ -1,6 +1,17 @@
 {
-  "updated": "2026-11-13 20:38",
+  "updated": "2026-11-13 21:07",
   "messages": [
+    {
+      "id": "05fbff1b16fad4980abfcb689edb4c1c",
+      "dest": "社内グループLINE（動画と一緒に送る）",
+      "tone": "⑤グループLINE",
+      "toneClass": "tone-group",
+      "type": "グループ",
+      "message": "お疲れ様です！\n菊建ボットに名前が付きました。\n「キクペディア」です。\n\n何ができるかは、この動画（1分）を見てください。\n\n分からないことは、まずキクペディアに聞いてみてください。",
+      "priority": "high",
+      "priorityLabel": "🔴急ぎ",
+      "created": "2026-11-13 21:07"
+    },
     {
       "id": "d15701dc39361534a9d12d97fae086e1",
       "dest": "社内グループLINE",
