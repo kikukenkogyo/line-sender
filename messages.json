@@ -1,6 +1,17 @@
 {
-  "updated": "2026-11-17 14:01",
+  "updated": "2026-11-17 15:07",
   "messages": [
+    {
+      "id": "18f639ee278cd689139d38ff4a0fdc94",
+      "dest": "福田さん",
+      "tone": "②仕事",
+      "toneClass": "tone-work",
+      "type": "仕事",
+      "message": "お疲れ様です。\nSNSに上げる予定の動画を2本作りました。\n①元請さん向け（計画力）\n②人材募集\n\nこのあと動画を送るので、見てもらって、気になる所があれば教えてください。\nよろしくお願いします。",
+      "priority": "high",
+      "priorityLabel": "🔴急ぎ",
+      "created": "2026-11-17 15:07"
+    },
     {
       "id": "af3ef38e4d80bb52d3490c6ea3abcb88",
       "dest": "社内グループLINE",
