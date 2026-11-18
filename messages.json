@@ -1,6 +1,17 @@
 {
-  "updated": "2026-11-17 17:26",
+  "updated": "2026-11-18 17:19",
   "messages": [
+    {
+      "id": "c0518ff4ecde8d466f66fc533463448f",
+      "dest": "社内グループLINE",
+      "tone": "⑤グループLINE",
+      "toneClass": "tone-group",
+      "type": "グループ",
+      "message": "お疲れ様です。\n乗用車のヴォクシーが廃車になります。\n11月21日（土）にディーラーが引き取りに来ます。\n\nそれまでに、車の中の片付けと掃除を、どなたかお願いします。\n\nよろしくお願いします。",
+      "priority": "high",
+      "priorityLabel": "🔴急ぎ",
+      "created": "2026-11-18 17:19"
+    },
     {
       "id": "733d27e32f13bcc868fae2118c56f5ad",
       "dest": "竹彦工務店 竹井社長",
